@@ -1,8 +1,5 @@
-import time
+entradas_log = []
 
 def executar_bot():
-    print("[LOG] Bot rodando na nuvem com OCR, IA e estratégia Fibonacci...")
-    while True:
-        # Simulação da lógica do bot
-        print("[LOG] Avaliando gráfico, aplicando análise técnica e IA...")
-        time.sleep(60)
+    # exemplo:
+    entradas_log.append("Entrada executada em EUR/USD com score 95 - CALL")

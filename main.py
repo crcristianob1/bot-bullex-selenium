@@ -1,21 +1,65 @@
 from bot import executar_bot
-from flask import Flask
+from flask import Flask, send_file
 import threading
-import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
+import requests
+import time
 
 app = Flask(__name__)
+log_path = "logs.csv"
 
-@app.route('/')
+@app.route("/")
 def home():
     return "Bot Bullex está rodando na nuvem com OCR, IA e estratégia Fibonacci..."
 
-def iniciar_servidor():
-    port = int(os.environ.get("PORT", 10000))  # Porta dinâmica da Render
-    app.run(host="0.0.0.0", port=port)
+@app.route("/grafico")
+def gerar_grafico():
+    try:
+        df = pd.read_csv(log_path)
+        contagem = df["resultado"].value_counts()
+
+        fig, ax = plt.subplots()
+        ax.pie(contagem, labels=contagem.index, autopct='%1.1f%%')
+        ax.set_title("Resultados: Win vs Loss")
+        fig.savefig("grafico.png")
+
+        return send_file("grafico.png", mimetype='image/png')
+    except Exception as e:
+        return f"Erro ao gerar gráfico: {e}"
+
+@app.route("/registrar/<par>/<resultado>")
+def registrar(par, resultado):
+    registrar_entrada(par, resultado)
+    return f"Entrada registrada: {par} - {resultado}"
+
+def registrar_entrada(par, resultado, tipo="Compra"):
+    dados = {
+        "horario": [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+        "par": [par],
+        "resultado": [resultado],
+        "tipo": [tipo]
+    }
+
+    df_novo = pd.DataFrame(dados)
+    try:
+        df_antigo = pd.read_csv(log_path)
+        df_total = pd.concat([df_antigo, df_novo], ignore_index=True)
+    except FileNotFoundError:
+        df_total = df_novo
+
+    df_total.to_csv(log_path, index=False)
+
+def manter_ativo():
+    while True:
+        try:
+            requests.get("https://bot-bullex-selenium-4.onrender.com/")
+        except:
+            pass
+        time.sleep(600)
 
 if __name__ == "__main__":
-    print("[INIT] Iniciando bot Bullex na nuvem...")
-    print("[LOG] Bot rodando com OCR, IA e estratégia Fibonacci...")
-    print("[LOG] Avaliando gráfico, aplicando análise técnica e IA...")
-    threading.Thread(target=iniciar_servidor).start()
-    executar_bot()
+    threading.Thread(target=executar_bot).start()
+    threading.Thread(target=manter_ativo).start()
+    app.run(host="0.0.0.0", port=10000)

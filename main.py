@@ -1,3 +1,4 @@
+from bot import executar_bot
 from flask import Flask
 import threading
 
@@ -12,5 +13,4 @@ def iniciar_servidor():
 
 if __name__ == "__main__":
     threading.Thread(target=iniciar_servidor).start()
-    # Aqui você chama sua função principal do bot
     executar_bot()

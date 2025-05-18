@@ -1,3 +1,4 @@
+from datetime import datetime
 entradas_log = []
 
 def executar_bot():

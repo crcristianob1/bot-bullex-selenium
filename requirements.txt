@@ -3,3 +3,5 @@ selenium
 pytesseract
 opencv-python
 pillow
+matplotlib
+pandas
